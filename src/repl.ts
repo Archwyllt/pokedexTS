@@ -1,4 +1,5 @@
 import * as readline from "readline";
+import { getCommands } from "./command.js";
 
 /**
  * Cleans and normalizes user input by trimming whitespace,
@@ -7,10 +8,7 @@ import * as readline from "readline";
  * @returns Array of lowercase words with whitespace removed
  */
 export function cleanInput(input: string): string[] {
-  return input
-    .trim()
-    .toLowerCase()
-    .split(/\s+/);
+  return input.trim().toLowerCase().split(/\s+/);
 }
 
 /**
@@ -18,6 +16,8 @@ export function cleanInput(input: string): string[] {
  * Continuously prompts for user input, processes commands, and displays results.
  */
 export function startREPL(): void {
+  const commands = getCommands();
+
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -34,7 +34,19 @@ export function startREPL(): void {
       return;
     }
 
-    console.log(`Your command was: ${words[0]}`);
+    const commandName = words[0];
+    const command = commands[commandName];
+
+    if (command) {
+      try {
+        command.callback(commands);
+      } catch (error) {
+        console.error(`Error executing command: ${error}`);
+      }
+    } else {
+      console.log("Unknown command");
+    }
+
     rl.prompt();
   });
 }
