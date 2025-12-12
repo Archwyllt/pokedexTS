@@ -4,7 +4,7 @@ import type { State } from "./state.js";
  * Displays help information for all available commands.
  * @param state - Application state containing command registry
  */
-export function commandHelp(state: State): void {
+export async function commandHelp(state: State): Promise<void> {
   console.log("Welcome to the Pokedex!");
   console.log("Usage:");
   console.log();
