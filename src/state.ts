@@ -3,7 +3,11 @@ import { commandHelp } from "./command_help.js";
 import { commandExit } from "./command_exit.js";
 import { commandMap } from "./command_map.js";
 import { commandMapB } from "./command_mapb.js";
-import { PokeAPI } from "./pokeapi.js";
+import { commandExplore } from "./command_explore.js";
+import { commandCatch } from "./command_catch.js";
+import { commandInspect } from "./command_inspect.js";
+import { PokeAPI, type Pokemon } from "./pokeapi.js";
+import { Cache } from "./pokecache.js";
 
 /**
  * Represents a CLI command with its metadata and execution logic.
@@ -11,7 +15,7 @@ import { PokeAPI } from "./pokeapi.js";
 export type CLICommand = {
   name: string;
   description: string;
-  callback: (state: State) => Promise<void>;
+  callback: (state: State, ...args: string[]) => Promise<void>;
 };
 
 /**
@@ -23,6 +27,7 @@ export type State = {
   pokeapi: PokeAPI;
   nextLocationsURL: string | null;
   prevLocationsURL: string | null;
+  pokedex: Record<string, Pokemon>;
 };
 
 /**
@@ -58,9 +63,25 @@ export function initState(): State {
       description: "Display the previous 20 location areas",
       callback: commandMapB,
     },
+    explore: {
+      name: "explore",
+      description: "Explore a location area to find Pokemon",
+      callback: commandExplore,
+    },
+    catch: {
+      name: "catch",
+      description: "Attempt to catch a Pokemon",
+      callback: commandCatch,
+    },
+    inspect: {
+      name: "inspect",
+      description: "View details of a caught Pokemon",
+      callback: commandInspect,
+    },
   };
 
-  const pokeapi = new PokeAPI();
+  const cache = new Cache(60000);
+  const pokeapi = new PokeAPI(cache);
 
   return {
     rl,
@@ -68,5 +89,6 @@ export function initState(): State {
     pokeapi,
     nextLocationsURL: null,
     prevLocationsURL: null,
+    pokedex: {},
   };
 }
